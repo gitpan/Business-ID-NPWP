@@ -14,11 +14,11 @@ Business::ID::NPWP - Validate Indonesian taxpayer registration number (NPWP)
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
@@ -61,8 +61,8 @@ from 1. It is distributed in blocks by the central tax office (kantor
 pusat dirjen pajak, DJP) to the local tax offices (kantor pelayanan
 pajak, KPP) throughout the country for allocation to taypayers.
 
-C<C> is a check digit. Due to lack of documentation, the checking of
-check digits is not yet implemented by this module.
+C<C> is a check digit. It is apparently using Luhn (modulus 10)
+algorithm on the first 9 digits on the NPWP.
 
 C<OOO> is a 3-digit local tax office code (kode KPP).
 
@@ -112,6 +112,13 @@ sub validate {
 	if (length == 12) { $_ .= "000" }
 	if (length != 15) {
 	    $self->{_err} = "not 15 digit";
+	    return;
+	}
+	/^(.)(.)(.)(.)(.)(.)(.)(.)(.)/;
+	if ((_z(1*$1) + _z(2*$2) + _z(1*$3) + 
+	     _z(2*$4) + _z(1*$5) + _z(2*$6) + 
+	     _z(1*$7) + _z(2*$8) + _z(1*$9)) % 10) {
+	    $self->{_err} = "wrong check digit";
 	    return;
 	}
 	/^..(\d{6})/;
@@ -271,6 +278,8 @@ sub validate_npwp {
     my ($str) = @_;
     Business::ID::NPWP->new($str)->validate();
 }
+
+sub _z { $_[0] > 9 ? $_[0]-9 : $_[0] }
 
 =head1 AUTHOR
 
