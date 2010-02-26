@@ -1,84 +1,15 @@
 package Business::ID::NPWP;
+our $VERSION = '0.03';
+# ABSTRACT: Validate Indonesian taxpayer registration number (NPWP)
+
 
 use warnings;
 use strict;
 use DateTime;
 require Exporter;
-use vars qw(@ISA @EXPORT);
-@ISA = qw(Exporter);
-@EXPORT = qw(validate_npwp);
+our @ISA = qw(Exporter);
+our @EXPORT = qw(validate_npwp);
 
-=head1 NAME
-
-Business::ID::NPWP - Validate Indonesian taxpayer registration number (NPWP)
-
-=head1 VERSION
-
-Version 0.02
-
-=cut
-
-our $VERSION = '0.02';
-
-=head1 SYNOPSIS
-
-    use Business::ID::NPWP;
-    
-    # OO-style
-
-    my $npwp = Business::ID::NPWP->new($str);
-    die "Invalid NPWP!" unless $npwp->validate;
-
-    print $npwp->taxpayer_code, "\n"; # also, kode_wajib_pajak()
-    print $npwp->serial, "\n"; # also, nomor_urut()
-    print $npwp->check_digit, "\n";
-    print $npwp->local_tax_office_code, "\n"; # also, kode_kpp()
-    print $npwp->branch_code, "\n"; # also, kode_cabang()
-
-    # procedural style
-
-    validate_npwp($str) or die "Invalid NPWP!";
-    
-=head1 DESCRIPTION
-
-This module can be used to validate Indonesian taxpayer registration
-number, Nomor Pokok Wajib Pajak (NPWP).
-
-NPWP is composed of 15 digits as follow:
-
- ST.sss.sss.C-OOO.BBB
-
-C<S> is a serial number from 0-9 (so far haven't seen 7 and up, but
-it's probably possible).
-
-C<T> denotes taxpayer type code (0 = government treasury [bendahara
-pemerintah], 1-3 = company/organization [badan], 4/6 = invidual
-entrepreneur [pengusaha perorangan], 5 = civil servants [pegawai
-negeri, PNS], 7-9 = individual employee [pegawai perorangan]).
-
-C<sss.sss> is a 6-digit serial code for the taxpayer, probably starts
-from 1. It is distributed in blocks by the central tax office (kantor
-pusat dirjen pajak, DJP) to the local tax offices (kantor pelayanan
-pajak, KPP) throughout the country for allocation to taypayers.
-
-C<C> is a check digit. It is apparently using Luhn (modulus 10)
-algorithm on the first 9 digits on the NPWP.
-
-C<OOO> is a 3-digit local tax office code (kode KPP).
-
-C<BBB> is a 3-digit branch code. C<000> means the taxpayer is the sole
-branch (or, for individuals, the head of the family). C<001>, C<002>,
-and so on denote each branch.
-
-=cut
-
-=head1 METHODS
-
-=head2 new $str
-
-Create a new C<Business::ID::NPWP> object.
-
-=cut
 
 sub new {
     my ($class, $str) = @_;
@@ -89,13 +20,6 @@ sub new {
     }, $class;
 }
 
-=head2 validate()
-
-Return true if NPWP is valid, or false if otherwise. In the case of NPWP
-being invalid, you can call the errstr() method to get a description
-of the error.
-
-=cut
 
 sub validate {
     my ($self, $another) = @_;
@@ -130,12 +54,6 @@ sub validate {
     $self->{_res} = 1;
 }
 
-=head2 errstr()
-
-Return validation error of NPWP, or undef if no error is found. See
-C<validate()>.
-
-=cut
 
 sub errstr {
     my ($self) = @_;
@@ -143,11 +61,6 @@ sub errstr {
     $self->{_err};
 }
 
-=head2 normalize()
-
-Return formatted NPWP, or undef if NPWP is invalid.
-
-=cut
 
 sub normalize {
     my ($self, $another) = @_;
@@ -157,19 +70,9 @@ sub normalize {
     "$1.$2.$3.$4-$5.$6";
 }
 
-=head2 pretty()
-
-Alias for normalize().
-
-=cut
 
 sub pretty { normalize(@_) }
 
-=head2 taxpayer_code()
-
-Return 2-digit taxpayer code component of NPWP, or undef if NPWP is invalid.
-
-=cut
 
 sub taxpayer_code {
     my ($self) = @_;
@@ -178,27 +81,12 @@ sub taxpayer_code {
     $1;
 }
 
-=head2 kode_wajib_pajak()
-
-Alias for taxpayer_code().
-
-=cut
 
 sub kode_wajib_pajak { taxpayer_code(@_) }
 
-=head2 kode_wp()
-
-Alias for taxpayer_code().
-
-=cut
 
 sub kode_wp { taxpayer_code(@_) }
 
-=head2 serial()
-
-Return 6-digit serial component of NPWP, or undef if NPWP is invalid.
-
-=cut
 
 sub serial {
     my ($self) = @_;
@@ -207,11 +95,6 @@ sub serial {
     $1;
 }
 
-=head2 check_digit()
-
-Return check digit component of NPWP, or undef if NPWP is invalid.
-
-=cut
 
 sub check_digit {
     my ($self) = @_;
@@ -220,11 +103,6 @@ sub check_digit {
     $1;
 }
 
-=head2 local_tax_office_code()
-
-Return 3-digit local tax office code component of NPWP, or undef if NPWP is invalid.
-
-=cut
 
 sub local_tax_office_code {
     my ($self) = @_;
@@ -233,19 +111,9 @@ sub local_tax_office_code {
     $1;
 }
 
-=head2 kode_kpp()
-
-Alias for local_tax_office_code().
-
-=cut
 
 sub kode_kpp { local_tax_office_code(@_) }
 
-=head2 branch_code()
-
-Return 3-digit branch code component of NPWP, or undef if NPWP is invalid.
-
-=cut
 
 sub branch_code {
     my ($self) = @_;
@@ -254,13 +122,139 @@ sub branch_code {
     $1;
 }
 
+
+sub kode_cabang { branch_code(@_) }
+
+
+sub validate_npwp {
+    my ($str) = @_;
+    Business::ID::NPWP->new($str)->validate();
+}
+
+sub _z { $_[0] > 9 ? $_[0]-9 : $_[0] }
+
+
+__END__
+=pod
+
+=head1 NAME
+
+Business::ID::NPWP - Validate Indonesian taxpayer registration number (NPWP)
+
+=head1 VERSION
+
+version 0.03
+
+=head1 SYNOPSIS
+
+    use Business::ID::NPWP;
+    
+    # OO-style
+
+    my $npwp = Business::ID::NPWP->new($str);
+    die "Invalid NPWP!" unless $npwp->validate;
+
+    print $npwp->taxpayer_code, "\n"; # also, kode_wajib_pajak()
+    print $npwp->serial, "\n"; # also, nomor_urut()
+    print $npwp->check_digit, "\n";
+    print $npwp->local_tax_office_code, "\n"; # also, kode_kpp()
+    print $npwp->branch_code, "\n"; # also, kode_cabang()
+
+    # procedural style
+
+    validate_npwp($str) or die "Invalid NPWP!";
+
+=head1 DESCRIPTION
+
+This module can be used to validate Indonesian taxpayer registration
+number, Nomor Pokok Wajib Pajak (NPWP).
+
+NPWP is composed of 15 digits as follow:
+
+ ST.sss.sss.C-OOO.BBB
+
+C<S> is a serial number from 0-9 (so far haven't seen 7 and up, but
+it's probably possible).
+
+C<T> denotes taxpayer type code (0 = government treasury [bendahara
+pemerintah], 1-3 = company/organization [badan], 4/6 = invidual
+entrepreneur [pengusaha perorangan], 5 = civil servants [pegawai
+negeri, PNS], 7-9 = individual employee [pegawai perorangan]).
+
+C<sss.sss> is a 6-digit serial code for the taxpayer, probably starts
+from 1. It is distributed in blocks by the central tax office (kantor
+pusat dirjen pajak, DJP) to the local tax offices (kantor pelayanan
+pajak, KPP) throughout the country for allocation to taypayers.
+
+C<C> is a check digit. It is apparently using Luhn (modulus 10)
+algorithm on the first 9 digits on the NPWP.
+
+C<OOO> is a 3-digit local tax office code (kode KPP).
+
+C<BBB> is a 3-digit branch code. C<000> means the taxpayer is the sole
+branch (or, for individuals, the head of the family). C<001>, C<002>,
+and so on denote each branch.
+
+=head1 METHODS
+
+=head2 new $str
+
+Create a new C<Business::ID::NPWP> object.
+
+=head2 validate()
+
+Return true if NPWP is valid, or false if otherwise. In the case of NPWP
+being invalid, you can call the errstr() method to get a description
+of the error.
+
+=head2 errstr()
+
+Return validation error of NPWP, or undef if no error is found. See
+C<validate()>.
+
+=head2 normalize()
+
+Return formatted NPWP, or undef if NPWP is invalid.
+
+=head2 pretty()
+
+Alias for normalize().
+
+=head2 taxpayer_code()
+
+Return 2-digit taxpayer code component of NPWP, or undef if NPWP is invalid.
+
+=head2 kode_wajib_pajak()
+
+Alias for taxpayer_code().
+
+=head2 kode_wp()
+
+Alias for taxpayer_code().
+
+=head2 serial()
+
+Return 6-digit serial component of NPWP, or undef if NPWP is invalid.
+
+=head2 check_digit()
+
+Return check digit component of NPWP, or undef if NPWP is invalid.
+
+=head2 local_tax_office_code()
+
+Return 3-digit local tax office code component of NPWP, or undef if NPWP is invalid.
+
+=head2 kode_kpp()
+
+Alias for local_tax_office_code().
+
+=head2 branch_code()
+
+Return 3-digit branch code component of NPWP, or undef if NPWP is invalid.
+
 =head2 kode_cabang()
 
 Alias for branch_code().
-
-=cut
-
-sub kode_cabang { branch_code(@_) }
 
 =head1 FUNCTIONS
 
@@ -272,37 +266,17 @@ C<errstr> method).
 
 Exported by default.
 
-=cut
-
-sub validate_npwp {
-    my ($str) = @_;
-    Business::ID::NPWP->new($str)->validate();
-}
-
-sub _z { $_[0] > 9 ? $_[0]-9 : $_[0] }
-
-=head1 AUTHOR
-
-Steven Haryanto, C<< <stevenharyanto at gmail.com> >>
-
 =head1 BUGS
-
-The list of valid 'province' codes in the program might need to be
-updated from time to time.
 
 Please report any bugs or feature requests to C<bug-business-id-npwp at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Business-ID-NPWP>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
-
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
     perldoc Business::ID::NPWP
-
 
 You can also look for information at:
 
@@ -326,21 +300,18 @@ L<http://search.cpan.org/dist/Business-ID-NPWP/>
 
 =back
 
+1;
 
-=head1 ACKNOWLEDGEMENTS
+=head1 AUTHOR
 
+  Steven Haryanto <stevenharyanto@gmail.com>
 
-=head1 COPYRIGHT & LICENSE
+=head1 COPYRIGHT AND LICENSE
 
-Copyright 2009 Steven Haryanto.
+This software is copyright (c) 2010 by Steven Haryanto.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
-
-See http://dev.perl.org/licenses/ for more information.
-
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut
 
-1;

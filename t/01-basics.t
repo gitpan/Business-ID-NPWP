@@ -2,11 +2,9 @@
 
 use strict;
 use warnings;
-use Test::More tests => 17 +10;
+use Test::More tests => 16 +10;
 
-BEGIN {
-    use_ok( 'Business::ID::NPWP' );
-}
+use Business::ID::NPWP;
 
 ok(!(validate_npwp("") ? 1:0), "procedural style (1)");
 ok((validate_npwp("00.000.001.8-000.000") ? 1:0), "procedural style (2)");

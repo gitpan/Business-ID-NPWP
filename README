@@ -1,46 +1,153 @@
-Business-ID-NPWP
+NAME
+    Business::ID::NPWP - Validate Indonesian taxpayer registration number
+    (NPWP)
 
-This module can be used to validate Indonesian taxpayer registration number,
-Nomor Pokok Wajib Pajak (NPWP).
+VERSION
+    version 0.03
 
-INSTALLATION
+SYNOPSIS
+        use Business::ID::NPWP;
+    
+        # OO-style
 
-To install this module, run the following commands:
+        my $npwp = Business::ID::NPWP->new($str);
+        die "Invalid NPWP!" unless $npwp->validate;
 
-	perl Makefile.PL
-	make
-	make test
-	make install
+        print $npwp->taxpayer_code, "\n"; # also, kode_wajib_pajak()
+        print $npwp->serial, "\n"; # also, nomor_urut()
+        print $npwp->check_digit, "\n";
+        print $npwp->local_tax_office_code, "\n"; # also, kode_kpp()
+        print $npwp->branch_code, "\n"; # also, kode_cabang()
 
-SUPPORT AND DOCUMENTATION
+        # procedural style
 
-After installing, you can find documentation for this module with the
-perldoc command.
+        validate_npwp($str) or die "Invalid NPWP!";
 
-    perldoc Business::ID::NPWP
+DESCRIPTION
+    This module can be used to validate Indonesian taxpayer registration
+    number, Nomor Pokok Wajib Pajak (NPWP).
 
-You can also look for information at:
+    NPWP is composed of 15 digits as follow:
 
-    RT, CPAN's request tracker
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Business-ID-NPWP
+     ST.sss.sss.C-OOO.BBB
 
-    AnnoCPAN, Annotated CPAN documentation
-        http://annocpan.org/dist/Business-ID-NPWP
+    "S" is a serial number from 0-9 (so far haven't seen 7 and up, but it's
+    probably possible).
 
-    CPAN Ratings
-        http://cpanratings.perl.org/d/Business-ID-NPWP
+    "T" denotes taxpayer type code (0 = government treasury [bendahara
+    pemerintah], 1-3 = company/organization [badan], 4/6 = invidual
+    entrepreneur [pengusaha perorangan], 5 = civil servants [pegawai negeri,
+    PNS], 7-9 = individual employee [pegawai perorangan]).
 
-    Search CPAN
-        http://search.cpan.org/dist/Business-ID-NPWP/
+    "sss.sss" is a 6-digit serial code for the taxpayer, probably starts
+    from 1. It is distributed in blocks by the central tax office (kantor
+    pusat dirjen pajak, DJP) to the local tax offices (kantor pelayanan
+    pajak, KPP) throughout the country for allocation to taypayers.
 
+    "C" is a check digit. It is apparently using Luhn (modulus 10) algorithm
+    on the first 9 digits on the NPWP.
 
-COPYRIGHT AND LICENCE
+    "OOO" is a 3-digit local tax office code (kode KPP).
 
-Copyright (C) 2009 Steven Haryanto
+    "BBB" is a 3-digit branch code. 000 means the taxpayer is the sole
+    branch (or, for individuals, the head of the family). 001, 002, and so
+    on denote each branch.
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of either: the GNU General Public License as published
-by the Free Software Foundation; or the Artistic License.
+METHODS
+  new $str
+    Create a new "Business::ID::NPWP" object.
 
-See http://dev.perl.org/licenses/ for more information.
+  validate()
+    Return true if NPWP is valid, or false if otherwise. In the case of NPWP
+    being invalid, you can call the errstr() method to get a description of
+    the error.
+
+  errstr()
+    Return validation error of NPWP, or undef if no error is found. See
+    "validate()".
+
+  normalize()
+    Return formatted NPWP, or undef if NPWP is invalid.
+
+  pretty()
+    Alias for normalize().
+
+  taxpayer_code()
+    Return 2-digit taxpayer code component of NPWP, or undef if NPWP is
+    invalid.
+
+  kode_wajib_pajak()
+    Alias for taxpayer_code().
+
+  kode_wp()
+    Alias for taxpayer_code().
+
+  serial()
+    Return 6-digit serial component of NPWP, or undef if NPWP is invalid.
+
+  check_digit()
+    Return check digit component of NPWP, or undef if NPWP is invalid.
+
+  local_tax_office_code()
+    Return 3-digit local tax office code component of NPWP, or undef if NPWP
+    is invalid.
+
+  kode_kpp()
+    Alias for local_tax_office_code().
+
+  branch_code()
+    Return 3-digit branch code component of NPWP, or undef if NPWP is
+    invalid.
+
+  kode_cabang()
+    Alias for branch_code().
+
+FUNCTIONS
+  validate_npwp($string)
+    Return true if NPWP is valid, or false if otherwise. If you want to know
+    the error details, you need to use the OO version (see the "errstr"
+    method).
+
+    Exported by default.
+
+BUGS
+    Please report any bugs or feature requests to "bug-business-id-npwp at
+    rt.cpan.org", or through the web interface at
+    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Business-ID-NPWP>. I
+    will be notified, and then you'll automatically be notified of progress
+    on your bug as I make changes.
+
+SUPPORT
+    You can find documentation for this module with the perldoc command.
+
+        perldoc Business::ID::NPWP
+
+    You can also look for information at:
+
+    *   RT: CPAN's request tracker
+
+        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Business-ID-NPWP>
+
+    *   AnnoCPAN: Annotated CPAN documentation
+
+        <http://annocpan.org/dist/Business-ID-NPWP>
+
+    *   CPAN Ratings
+
+        <http://cpanratings.perl.org/d/Business-ID-NPWP>
+
+    *   Search CPAN
+
+        <http://search.cpan.org/dist/Business-ID-NPWP/>
+
+    1;
+
+AUTHOR
+      Steven Haryanto <stevenharyanto@gmail.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2010 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
 
