@@ -3,25 +3,12 @@ NAME
     (NPWP)
 
 VERSION
-    version 0.03
+    version 0.04
 
 SYNOPSIS
-        use Business::ID::NPWP;
-    
-        # OO-style
+     use Business::ID::NPWP qw(parse_npwp);
 
-        my $npwp = Business::ID::NPWP->new($str);
-        die "Invalid NPWP!" unless $npwp->validate;
-
-        print $npwp->taxpayer_code, "\n"; # also, kode_wajib_pajak()
-        print $npwp->serial, "\n"; # also, nomor_urut()
-        print $npwp->check_digit, "\n";
-        print $npwp->local_tax_office_code, "\n"; # also, kode_kpp()
-        print $npwp->branch_code, "\n"; # also, kode_cabang()
-
-        # procedural style
-
-        validate_npwp($str) or die "Invalid NPWP!";
+     my $res = parse_npwp(npwp => "02.183.241.5-000.000");
 
 DESCRIPTION
     This module can be used to validate Indonesian taxpayer registration
@@ -53,101 +40,31 @@ DESCRIPTION
     branch (or, for individuals, the head of the family). 001, 002, and so
     on denote each branch.
 
-METHODS
-  new $str
-    Create a new "Business::ID::NPWP" object.
-
-  validate()
-    Return true if NPWP is valid, or false if otherwise. In the case of NPWP
-    being invalid, you can call the errstr() method to get a description of
-    the error.
-
-  errstr()
-    Return validation error of NPWP, or undef if no error is found. See
-    "validate()".
-
-  normalize()
-    Return formatted NPWP, or undef if NPWP is invalid.
-
-  pretty()
-    Alias for normalize().
-
-  taxpayer_code()
-    Return 2-digit taxpayer code component of NPWP, or undef if NPWP is
-    invalid.
-
-  kode_wajib_pajak()
-    Alias for taxpayer_code().
-
-  kode_wp()
-    Alias for taxpayer_code().
-
-  serial()
-    Return 6-digit serial component of NPWP, or undef if NPWP is invalid.
-
-  check_digit()
-    Return check digit component of NPWP, or undef if NPWP is invalid.
-
-  local_tax_office_code()
-    Return 3-digit local tax office code component of NPWP, or undef if NPWP
-    is invalid.
-
-  kode_kpp()
-    Alias for local_tax_office_code().
-
-  branch_code()
-    Return 3-digit branch code component of NPWP, or undef if NPWP is
-    invalid.
-
-  kode_cabang()
-    Alias for branch_code().
-
-FUNCTIONS
-  validate_npwp($string)
-    Return true if NPWP is valid, or false if otherwise. If you want to know
-    the error details, you need to use the OO version (see the "errstr"
-    method).
-
-    Exported by default.
-
-BUGS
-    Please report any bugs or feature requests to "bug-business-id-npwp at
-    rt.cpan.org", or through the web interface at
-    <http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Business-ID-NPWP>. I
-    will be notified, and then you'll automatically be notified of progress
-    on your bug as I make changes.
-
-SUPPORT
-    You can find documentation for this module with the perldoc command.
-
-        perldoc Business::ID::NPWP
-
-    You can also look for information at:
-
-    *   RT: CPAN's request tracker
-
-        <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Business-ID-NPWP>
-
-    *   AnnoCPAN: Annotated CPAN documentation
-
-        <http://annocpan.org/dist/Business-ID-NPWP>
-
-    *   CPAN Ratings
-
-        <http://cpanratings.perl.org/d/Business-ID-NPWP>
-
-    *   Search CPAN
-
-        <http://search.cpan.org/dist/Business-ID-NPWP/>
-
-    1;
-
 AUTHOR
-      Steven Haryanto <stevenharyanto@gmail.com>
+    Steven Haryanto <stevenharyanto@gmail.com>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2010 by Steven Haryanto.
+    This software is copyright (c) 2013 by Steven Haryanto.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.
+
+FUNCTIONS
+    None are exported by default, but they are exportable.
+
+  parse_npwp(%args) -> [status, msg, result, meta]
+    Arguments ('*' denotes required arguments):
+
+    *   npwp* => *str*
+
+        Input NPWP to be parsed.
+
+    Return value:
+
+    Returns an enveloped result (an array). First element (status) is an
+    integer containing HTTP status code (200 means OK, 4xx caller error, 5xx
+    function error). Second element (msg) is a string containing error
+    message, or 'OK' if status is 200. Third element (result) is optional,
+    the actual result. Fourth element (meta) is called result metadata and
+    is optional, a hash that contains extra information.
 
